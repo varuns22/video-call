@@ -60,22 +60,19 @@ public class CallingActivity extends AppCompatActivity {
             declineCall();
         });
 
-        acceptVideoCallBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        acceptVideoCallBtn.setOnClickListener(view -> {
 
-                mediaPlayer.stop();
+            mediaPlayer.stop();
 
-                final HashMap<String, Object> callingPickUpMap = new HashMap<>();
-                callingPickUpMap.put("callAccepted", "callAccepted");
+            final HashMap<String, Object> callingPickUpMap = new HashMap<>();
+            callingPickUpMap.put("callAccepted", "callAccepted");
 
-                usersRef.child(callerUserId).child("Ringing").updateChildren(callingPickUpMap).addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        Intent intent = new Intent(CallingActivity.this, VideoCallActivity.class);
-                        startActivity(intent);
-                    }
-                });
-            }
+            usersRef.child(callerUserId).child("Ringing").updateChildren(callingPickUpMap).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Intent intent = new Intent(CallingActivity.this, VideoCallActivity.class);
+                    startActivity(intent);
+                }
+            });
         });
 
         getAndSetUserProfileInfo();
@@ -94,13 +91,10 @@ public class CallingActivity extends AppCompatActivity {
 
                     callingId = snapshot.child("callToUser").getValue().toString();
 
-                    usersRef.child(callingId).child("Ringing").removeValue().addOnCompleteListener(task -> usersRef.child(callerUserId).child("Calling").removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if (task.isSuccessful()) {
-                                startActivity(new Intent(CallingActivity.this, RegistrationActivity.class));
-                                finish();
-                            }
+                    usersRef.child(callingId).child("Ringing").removeValue().addOnCompleteListener(task -> usersRef.child(callerUserId).child("Calling").removeValue().addOnCompleteListener(task12 -> {
+                        if (task12.isSuccessful()) {
+                            startActivity(new Intent(CallingActivity.this, RegistrationActivity.class));
+                            finish();
                         }
                     }));
 
@@ -176,7 +170,7 @@ public class CallingActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                if (declineCallButtonClicked && !snapshot.hasChild("Calling") && !snapshot.hasChild("Ringing")) {
+                if (!declineCallButtonClicked && !snapshot.hasChild("Calling") && !snapshot.hasChild("Ringing")) {
 
                     mediaPlayer.start();
 
